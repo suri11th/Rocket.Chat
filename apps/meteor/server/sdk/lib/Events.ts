@@ -23,6 +23,7 @@ import type {
 	ICustomSound,
 	VoipEventDataSignature,
 	UserStatus,
+	ILivechatPriority,
 } from '@rocket.chat/core-typings';
 
 import type { AutoUpdateRecord } from '../types/IMeteor';
@@ -136,4 +137,10 @@ export type EventSignatures = {
 	'call.callerhangup'(userId: string, data: { roomId: string }): void;
 	'watch.pbxevents'(data: { clientAction: ClientAction; data: Partial<IPbxEvent>; id: string }): void;
 	'connector.statuschanged'(enabled: boolean): void;
+	'watch.priorities'(data: {
+		clientAction: ClientAction;
+		data: Partial<ILivechatPriority>;
+		id: string;
+		diff?: Record<string, string>;
+	}): void;
 };

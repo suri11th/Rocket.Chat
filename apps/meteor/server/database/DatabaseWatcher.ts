@@ -7,7 +7,7 @@ import { MongoClient } from 'mongodb';
 
 import { convertChangeStreamPayload } from './convertChangeStreamPayload';
 import { convertOplogPayload } from './convertOplogPayload';
-import { watchCollections } from './watchCollections';
+import { watchCollections, watchEECollections } from './watchCollections';
 
 const instancePing = parseInt(String(process.env.MULTIPLE_INSTANCES_PING_INTERVAL)) || 10000;
 
@@ -165,7 +165,7 @@ export class DatabaseWatcher extends EventEmitter {
 			{
 				$match: {
 					'operationType': { $in: ['insert', 'update', 'delete'] },
-					'ns.coll': { $in: watchCollections },
+					'ns.coll': { $in: [...watchCollections, ...watchEECollections] },
 				},
 			},
 		]);

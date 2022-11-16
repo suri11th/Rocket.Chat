@@ -201,6 +201,10 @@ export class ListenersModule {
 			}
 		});
 
+		service.onEvent('watch.priorities', async ({ clientAction, diff, id }): Promise<void> => {
+			notifications.notifyLoggedInThisInstance('omni-priority-changed', { id, clientAction, name: diff?.name });
+		});
+
 		service.onEvent('watch.settings', async ({ clientAction, setting }): Promise<void> => {
 			if (clientAction !== 'removed') {
 				const result = await EnterpriseSettings.changeSettingValue(setting);
