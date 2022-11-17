@@ -19,10 +19,9 @@ const PORT = process.env.PORT || 3035;
 
 	// need to import service after models are registered
 	const { StreamHub } = await import('./StreamHub');
-	const { DatabaseWatcher } = await import('../../../../apps/meteor/server/database/DatabaseWatcher');
+	const { watcher } = await import('../../../../apps/meteor/server/database/DatabaseWatcher');
 
-	const watcher = new DatabaseWatcher({ db });
-
+	watcher.setDb(db);
 	api.registerService(new StreamHub(watcher));
 
 	await api.start();

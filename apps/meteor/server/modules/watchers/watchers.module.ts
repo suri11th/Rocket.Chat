@@ -16,7 +16,6 @@ import type {
 	SettingValue,
 	ILivechatInquiryRecord,
 	IRole,
-	ILivechatPriority,
 } from '@rocket.chat/core-typings';
 import {
 	Subscriptions,
@@ -34,13 +33,11 @@ import {
 	EmailInbox,
 	PbxEvents,
 	Permissions,
-	LivechatPriority,
 } from '@rocket.chat/models';
 
 import { subscriptionFields, roomFields } from './publishFields';
 import type { EventSignatures } from '../../sdk/lib/Events';
 import type { DatabaseWatcher } from '../../database/DatabaseWatcher';
-import { onLicense } from '../../../ee/app/license/server';
 
 type BroadcastCallback = <T extends keyof EventSignatures>(event: T, ...args: Parameters<EventSignatures[T]>) => Promise<void>;
 
@@ -367,24 +364,6 @@ export function initWatchers(watcher: DatabaseWatcher, broadcast: BroadcastCallb
 
 			broadcast('watch.pbxevents', { clientAction, data, id });
 		}
-	});
-
-	// TODO: Check how to build ee-only watchers (by creating a similar watcher module on ee)
-	// Include this on the task. This is for me to remember what to do tomorrow
-	onLicense('livechat-enterprise', () => {
-		watcher.on<ILivechatPriority>(LivechatPriority.getCollectionName(), async ({ clientAction, id, data: eventData, diff }) => {
-			if (clientAction !== 'updated' || !diff || !('name' in diff)) {
-				// For now, we don't support this actions from happening
-				return;
-			}
-
-			const data = eventData ?? (await LivechatPriority.findOne({ _id: id }));
-			if (!data) {
-				return;
-			}
-
-			broadcast('watch.priorities', { clientAction, data, id, diff });
-		});
 	});
 
 	watcherStarted = true;

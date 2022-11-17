@@ -1,4 +1,6 @@
 import { Meteor } from 'meteor/meteor';
+import type { ILivechatPriority } from '@rocket.chat/core-typings';
+import { LivechatPriority } from '@rocket.chat/models';
 
 import { settings } from '../../../../app/settings/server';
 import { updatePredictedVisitorAbandonment, updateQueueInactivityTimeout } from './lib/Helper';
@@ -8,6 +10,8 @@ import { MultipleBusinessHoursBehavior } from './business-hour/Multiple';
 import { SingleBusinessHourBehavior } from '../../../../app/livechat/server/business-hour/Single';
 import { businessHourManager } from '../../../../app/livechat/server/business-hour';
 import { resetDefaultBusinessHourIfNeeded } from './business-hour/Helper';
+import { watcher } from '../../../../server/database/DatabaseWatcher';
+import { api } from '../../../../server/sdk/api';
 
 const visitorActivityMonitor = new VisitorInactivityMonitor();
 const businessHours = {
@@ -41,4 +45,18 @@ Meteor.startup(async function () {
 	});
 
 	await resetDefaultBusinessHourIfNeeded();
+});
+
+watcher.on<ILivechatPriority>(LivechatPriority.getCollectionName(), async ({ clientAction, id, data: eventData, diff }) => {
+	if (clientAction !== 'updated' || !diff || !('name' in diff)) {
+		// For now, we don't support this actions from happening
+		return;
+	}
+
+	const data = eventData ?? (await LivechatPriority.findOne({ _id: id }));
+	if (!data) {
+		return;
+	}
+
+	api.broadcast('watch.priorities', { clientAction, data, id, diff });
 });

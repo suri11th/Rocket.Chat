@@ -39,12 +39,23 @@ export class DatabaseWatcher extends EventEmitter {
 	 */
 	private lastDocTS: Date;
 
-	constructor({ db, _oplogHandle, metrics }: { db: Db; _oplogHandle?: any; metrics?: any }) {
+	constructor() {
 		super();
+	}
 
+	setDb(db: Db): DatabaseWatcher {
 		this.db = db;
+		return this;
+	}
+
+	setOplogHandle(_oplogHandle: any): DatabaseWatcher {
 		this._oplogHandle = _oplogHandle;
+		return this;
+	}
+
+	setMetrics(metrics: any): DatabaseWatcher {
 		this.metrics = metrics;
+		return this;
 	}
 
 	async watch(): Promise<void> {
@@ -62,6 +73,10 @@ export class DatabaseWatcher extends EventEmitter {
 	}
 
 	private async isChangeStreamAvailable(): Promise<boolean> {
+		if (!this.db) {
+			throw new Error('No DB set');
+		}
+
 		if (ignoreChangeStream) {
 			return false;
 		}
@@ -207,3 +222,5 @@ export class DatabaseWatcher extends EventEmitter {
 		return this.getLastDocDelta() > maxDocMs;
 	}
 }
+
+export const watcher = new DatabaseWatcher();
