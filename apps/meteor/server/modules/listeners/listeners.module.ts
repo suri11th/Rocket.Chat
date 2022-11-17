@@ -202,7 +202,6 @@ export class ListenersModule {
 		});
 
 		service.onEvent('watch.priorities', async ({ clientAction, diff, id }): Promise<void> => {
-			console.log('watch.priorities', clientAction, diff, id);
 			notifications.notifyLoggedInThisInstance('omni-priority-changed', { id, clientAction, name: diff?.name });
 		});
 
