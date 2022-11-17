@@ -21,16 +21,14 @@ registerAdminRoute('/apps/what-is-it', {
 	component: lazy(() => import('./apps/AppsWhatIsIt')),
 });
 
-registerAdminRoute('/marketplace/:context?/:page?/:id?/:version?/:tab?', {
+registerAdminRoute('/marketplace/:context?/:id?/:version?/:tab?', {
 	name: 'admin-marketplace',
 	component: lazy(() => import('./apps/AppsRoute')),
-	triggersEnter: [
-		(context, redirect): void => {
-			if (!context.params.context) {
-				redirect('/admin/marketplace/all/list');
-			}
-		},
-	],
+});
+
+registerAdminRoute('/apps/:context?/:id?/:version?/:tab?', {
+	name: 'admin-apps',
+	component: lazy(() => import('./apps/AppsRoute')),
 });
 
 registerAdminRoute('/info', {

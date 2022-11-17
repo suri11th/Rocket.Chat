@@ -1,6 +1,6 @@
 import { OptionTitle } from '@rocket.chat/fuselage';
 import { useTranslation, useRoute } from '@rocket.chat/ui-contexts';
-import React, { ReactElement } from 'react';
+import React, { FC } from 'react';
 
 import { triggerActionButtonAction } from '../../../app/ui-message/client/ActionManager';
 import { IAppAccountBoxItem } from '../../../app/ui-utils/client/lib/AccountBox';
@@ -12,10 +12,9 @@ type AppsModelListProps = {
 	closeList: () => void;
 };
 
-const AppsModelList = ({ appBoxItems, showManageApps, closeList }: AppsModelListProps): ReactElement => {
+const AppsModelList: FC<AppsModelListProps> = ({ appBoxItems, showManageApps, closeList }) => {
 	const t = useTranslation();
 	const marketplaceRoute = useRoute('admin-marketplace');
-	const page = 'list';
 
 	return (
 		<>
@@ -27,7 +26,7 @@ const AppsModelList = ({ appBoxItems, showManageApps, closeList }: AppsModelList
 							icon='store'
 							text={t('Marketplace')}
 							action={(): void => {
-								marketplaceRoute.push({ context: 'all', page });
+								marketplaceRoute.push();
 								closeList();
 							}}
 						/>
@@ -35,7 +34,7 @@ const AppsModelList = ({ appBoxItems, showManageApps, closeList }: AppsModelList
 							icon='cube'
 							text={t('Installed')}
 							action={(): void => {
-								marketplaceRoute.push({ context: 'installed', page });
+								marketplaceRoute.push({ context: 'installed' });
 								closeList();
 							}}
 						/>

@@ -12,22 +12,27 @@ type Options = Array<[UserAutoCompleteOptionType['username'], UserAutoCompleteOp
 
 type OptionsContextValue = {
 	options: ComponentProps<typeof Options>['options'];
+	onSelect: ComponentProps<typeof Options>['onSelect'];
 };
 
 export const OptionsContext = createContext<OptionsContextValue>({
 	options: [],
+	onSelect: () => undefined,
 });
 const UserAutoCompleteMultipleOptions = forwardRef(function UserAutoCompleteMultipleOptions(
-	{ onSelect, ...props }: ComponentProps<typeof Options>,
+	{ onSelect: _onSelect, ...props }: ComponentProps<typeof Options>,
 	ref: Ref<HTMLElement>,
 ): ReactElement {
-	const { options } = useContext(OptionsContext);
+	const { options, onSelect } = useContext(OptionsContext);
 	return (
 		<Options
 			{...props}
 			key='AutocompleteOptions'
 			options={options}
-			onSelect={onSelect}
+			onSelect={(val): void => {
+				onSelect(val);
+				_onSelect(val);
+			}}
 			ref={ref}
 			renderItem={UserAutoCompleteMultipleOption}
 		/>

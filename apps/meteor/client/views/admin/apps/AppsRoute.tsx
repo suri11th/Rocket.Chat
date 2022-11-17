@@ -1,5 +1,5 @@
 import { useRouteParameter, useRoute, usePermission, useMethod } from '@rocket.chat/ui-contexts';
-import React, { useState, useEffect, ReactElement } from 'react';
+import React, { useState, useEffect, FC } from 'react';
 
 import PageSkeleton from '../../../components/PageSkeleton';
 import NotAuthorizedPage from '../../notAuthorized/NotAuthorizedPage';
@@ -8,18 +8,17 @@ import AppInstallPage from './AppInstallPage';
 import AppsPage from './AppsPage/AppsPage';
 import AppsProvider from './AppsProvider';
 
-const AppsRoute = (): ReactElement => {
+const AppsRoute: FC = () => {
 	const [isLoading, setLoading] = useState(true);
-	const canManageApps = usePermission('manage-apps');
+	const canViewAppsAndMarketplace = usePermission('manage-apps');
 	const isAppsEngineEnabled = useMethod('apps/is-enabled');
 	const appsWhatIsItRoute = useRoute('admin-apps-disabled');
-	const marketplaceRoute = useRoute('admin-marketplace');
 
 	useEffect(() => {
 		let mounted = true;
 
 		const initialize = async (): Promise<void> => {
-			if (!canManageApps) {
+			if (!canViewAppsAndMarketplace) {
 				return;
 			}
 
@@ -40,16 +39,15 @@ const AppsRoute = (): ReactElement => {
 		return (): void => {
 			mounted = false;
 		};
-	}, [canManageApps, isAppsEngineEnabled, appsWhatIsItRoute, marketplaceRoute]);
+	}, [canViewAppsAndMarketplace, isAppsEngineEnabled, appsWhatIsItRoute]);
 
 	const context = useRouteParameter('context');
 
 	const isMarketplace = !context;
 
 	const id = useRouteParameter('id');
-	const page = useRouteParameter('page');
 
-	if (!canManageApps) {
+	if (!canViewAppsAndMarketplace) {
 		return <NotAuthorizedPage />;
 	}
 
@@ -59,9 +57,9 @@ const AppsRoute = (): ReactElement => {
 
 	return (
 		<AppsProvider>
-			{(page === 'list' && <AppsPage isMarketplace={isMarketplace} />) ||
-				(id && page === 'info' && <AppDetailsPage id={id} />) ||
-				(page === 'install' && <AppInstallPage />)}
+			{((!context || context === 'installed') && <AppsPage isMarketplace={isMarketplace} />) ||
+				(id && context === 'details' && <AppDetailsPage id={id} />) ||
+				(context === 'install' && <AppInstallPage />)}
 		</AppsProvider>
 	);
 };

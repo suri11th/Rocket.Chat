@@ -35,13 +35,13 @@ test.describe.serial('administration-menu', () => {
 	test('expect open app marketplace page', async ({ page }) => {
 		await poHomeDiscussion.sidenav.openAdministrationByLabel('Marketplace');
 
-		await expect(page).toHaveURL('admin/marketplace/all/list');
+		await expect(page).toHaveURL('admin/marketplace');
 	});
 
 	test('expect open app installed page', async ({ page }) => {
 		await poHomeDiscussion.sidenav.openAdministrationByLabel('Installed');
 
-		await expect(page).toHaveURL('admin/marketplace/installed/list');
+		await expect(page).toHaveURL('admin/marketplace/installed');
 	});
 
 	test.describe('user', () => {

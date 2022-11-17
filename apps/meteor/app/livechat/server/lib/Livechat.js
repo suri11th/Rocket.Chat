@@ -751,7 +751,7 @@ export const Livechat = {
 		return RoutingManager.transferRoom(room, guest, transferData);
 	},
 
-	returnRoomAsInquiry(rid, departmentId, overrideTransferData = {}) {
+	returnRoomAsInquiry(rid, departmentId) {
 		Livechat.logger.debug(`Transfering room ${rid} to ${departmentId ? 'department' : ''} queue`);
 		const room = LivechatRooms.findOneById(rid);
 		if (!room) {
@@ -791,7 +791,7 @@ export const Livechat = {
 
 		const transferredBy = normalizeTransferredByData(user, room);
 		Livechat.logger.debug(`Transfering room ${room._id} by user ${transferredBy._id}`);
-		const transferData = { roomId: rid, scope: 'queue', departmentId, transferredBy, ...overrideTransferData };
+		const transferData = { roomId: rid, scope: 'queue', departmentId, transferredBy };
 		try {
 			this.saveTransferHistory(room, transferData);
 			RoutingManager.unassignAgent(inquiry, departmentId);

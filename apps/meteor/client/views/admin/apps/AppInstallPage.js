@@ -6,8 +6,7 @@ import {
 	useEndpoint,
 	useUpload,
 	useTranslation,
-	useCurrentRoute,
-	useRouteParameter,
+	useToastMessageDispatch,
 } from '@rocket.chat/ui-contexts';
 import React, { useCallback, useEffect, useState } from 'react';
 
@@ -17,25 +16,16 @@ import { useFileInput } from '../../../hooks/useFileInput';
 import { useForm } from '../../../hooks/useForm';
 import AppPermissionsReviewModal from './AppPermissionsReviewModal';
 import AppUpdateModal from './AppUpdateModal';
-import { useAppsReload } from './AppsContext';
-import { handleAPIError, handleInstallError } from './helpers';
+import { handleInstallError } from './helpers';
 import { getManifestFromZippedApp } from './lib/getManifestFromZippedApp';
 
 const placeholderUrl = 'https://rocket.chat/apps/package.zip';
 
 function AppInstallPage() {
 	const t = useTranslation();
+	const dispatchToastMessage = useToastMessageDispatch();
 
-	const reload = useAppsReload();
-
-	const [currentRouteName] = useCurrentRoute();
-	if (!currentRouteName) {
-		throw new Error('No current route name');
-	}
-	const router = useRoute(currentRouteName);
-
-	const context = useRouteParameter('context');
-
+	const appsRoute = useRoute('admin-apps');
 	const setModal = useSetModal();
 
 	const appId = useQueryStringParameter('id');
@@ -71,20 +61,25 @@ function AppInstallPage() {
 		fileData.append('app', appFile, appFile.name);
 		fileData.append('permissions', JSON.stringify(permissionsGranted));
 
-		try {
-			if (appId) {
+		if (appId) {
+			try {
 				await uploadUpdateApp(fileData);
-			} else {
-				app = await uploadApp(fileData);
+			} catch (error) {
+				dispatchToastMessage({ type: 'error', message: error });
+			} finally {
+				setModal(null);
 			}
-		} catch (e) {
-			handleAPIError(e);
+		} else {
+			try {
+				app = await uploadApp(fileData);
+			} catch (error) {
+				dispatchToastMessage({ type: 'error', message: error });
+			} finally {
+				setModal(null);
+			}
 		}
 
-		router.push({ context: 'installed', page: 'info', id: appId || app.app.id });
-
-		reload();
-
+		appsRoute.push({ context: 'details', id: appId || app.app.id });
 		setModal(null);
 	};
 
@@ -145,7 +140,7 @@ function AppInstallPage() {
 	};
 
 	const handleCancel = () => {
-		router.push({ context, page: 'list' });
+		appsRoute.push();
 	};
 
 	return (
