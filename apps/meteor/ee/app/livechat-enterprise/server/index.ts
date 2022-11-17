@@ -15,7 +15,6 @@ import './methods/resumeOnHold';
 import LivechatUnit from '../../models/server/models/LivechatUnit';
 import LivechatTag from '../../models/server/models/LivechatTag';
 import LivechatUnitMonitors from '../../models/server/models/LivechatUnitMonitors';
-import './startup';
 import './hooks/afterTakeInquiry';
 import './hooks/beforeNewInquiry';
 import './hooks/beforeNewRoom';
@@ -40,6 +39,8 @@ import { createDefaultPriorities } from './priorities';
 onLicense('livechat-enterprise', async () => {
 	require('./api');
 	require('./hooks');
+	await import('./startup');
+
 	const { createPermissions } = await import('./permissions');
 	const { createSettings } = await import('./settings');
 
