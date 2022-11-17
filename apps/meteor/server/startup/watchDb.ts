@@ -15,10 +15,6 @@ initWatchers(watcher, api.broadcastLocal.bind(api));
 
 watcher.watch();
 
-watcher.on('rocketchat_livechat_priority', (data) => {
-	SystemLogger.log('rocketchat_livechat_priority', data);
-});
-
 setInterval(function _checkDatabaseWatcher() {
 	if (watcher.isLastDocDelayed()) {
 		SystemLogger.error('No real time data received recently');

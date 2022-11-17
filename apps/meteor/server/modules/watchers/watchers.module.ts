@@ -373,7 +373,6 @@ export function initWatchers(watcher: DatabaseWatcher, broadcast: BroadcastCallb
 	// Include this on the task. This is for me to remember what to do tomorrow
 	onLicense('livechat-enterprise', () => {
 		watcher.on<ILivechatPriority>(LivechatPriority.getCollectionName(), async ({ clientAction, id, data: eventData, diff }) => {
-			console.log('LivechatPriority', clientAction, id, eventData, diff);
 			if (clientAction !== 'updated' || !diff || !('name' in diff)) {
 				// For now, we don't support this actions from happening
 				return;
