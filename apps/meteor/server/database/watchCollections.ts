@@ -14,10 +14,7 @@ import {
 	EmailInbox,
 	PbxEvents,
 	Permissions,
-	LivechatPriority,
 } from '@rocket.chat/models';
-
-import { onLicense } from '../../ee/app/license/server';
 
 export const watchCollections = [
 	Messages.getCollectionName(),
@@ -38,7 +35,3 @@ export const watchCollections = [
 ] as const;
 
 export const watchEECollections: string[] = [];
-
-onLicense('livechat-enterprise', () => {
-	watchEECollections.push(LivechatPriority.getCollectionName());
-});

@@ -12,6 +12,7 @@ import { businessHourManager } from '../../../../app/livechat/server/business-ho
 import { resetDefaultBusinessHourIfNeeded } from './business-hour/Helper';
 import { watcher } from '../../../../server/database/DatabaseWatcher';
 import { api } from '../../../../server/sdk/api';
+import { watchEECollections } from '../../../../server/database/watchCollections';
 
 const visitorActivityMonitor = new VisitorInactivityMonitor();
 const businessHours = {
@@ -47,6 +48,10 @@ Meteor.startup(async function () {
 	await resetDefaultBusinessHourIfNeeded();
 });
 
+// Services don't like the onLicense hook for some reason.
+// So for now, include the ee collection directly from here
+watchEECollections.push(LivechatPriority.getCollectionName());
+
 watcher.on<ILivechatPriority>(LivechatPriority.getCollectionName(), async ({ clientAction, id, data: eventData, diff }) => {
 	if (clientAction !== 'updated' || !diff || !('name' in diff)) {
 		// For now, we don't support this actions from happening
@@ -58,5 +63,6 @@ watcher.on<ILivechatPriority>(LivechatPriority.getCollectionName(), async ({ cli
 		return;
 	}
 
+	// What could wrong go?
 	api.broadcast('watch.priorities', { clientAction, data, id, diff });
 });
