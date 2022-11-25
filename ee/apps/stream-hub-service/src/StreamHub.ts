@@ -11,7 +11,8 @@ export class StreamHub extends ServiceClass implements IServiceClass {
 	}
 
 	async created(): Promise<void> {
-		initWatchers(this.watcher, this.api.broadcast.bind(this.api));
+		this.watcher.setBroadcast(this.api.broadcast.bind(this.api));
+		initWatchers(this.watcher);
 
 		this.watcher.watch();
 	}

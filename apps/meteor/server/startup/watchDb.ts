@@ -12,9 +12,10 @@ const { mongo } = MongoInternals.defaultRemoteCollectionDriver();
 watcher
 	.setDb(db)
 	.setMetrics(metrics)
-	.setOplogHandle((mongo as any)._oplogHandle);
+	.setOplogHandle((mongo as any)._oplogHandle)
+	.setBroadcast(api.broadcast.bind(api));
 
-initWatchers(watcher, api.broadcastLocal.bind(api));
+initWatchers(watcher);
 
 watcher.watch();
 

@@ -11,7 +11,6 @@ import { SingleBusinessHourBehavior } from '../../../../app/livechat/server/busi
 import { businessHourManager } from '../../../../app/livechat/server/business-hour';
 import { resetDefaultBusinessHourIfNeeded } from './business-hour/Helper';
 import { watcher } from '../../../../server/database/DatabaseWatcher';
-import { api } from '../../../../server/sdk/api';
 import { watchEECollections } from '../../../../server/database/watchCollections';
 
 const visitorActivityMonitor = new VisitorInactivityMonitor();
@@ -63,6 +62,7 @@ watcher.on<ILivechatPriority>(LivechatPriority.getCollectionName(), async ({ cli
 		return;
 	}
 
-	// What could wrong go?
-	api.broadcast('watch.priorities', { clientAction, data, id, diff });
+	// This solves the problem of broadcasting, since now, watcher is the one in charge of doing it.
+	// What i don't like is the idea of giving more responsibilities to watcher, even when this works
+	watcher.getBroadcast()('watch.priorities', { clientAction, data, id, diff });
 });

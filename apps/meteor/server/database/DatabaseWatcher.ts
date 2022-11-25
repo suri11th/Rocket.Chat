@@ -5,9 +5,12 @@ import type { Timestamp, Db, ChangeStreamDeleteDocument, ChangeStreamInsertDocum
 import { escapeRegExp } from '@rocket.chat/string-helpers';
 import { MongoClient } from 'mongodb';
 
+import type { EventSignatures } from '../sdk/lib/Events';
 import { convertChangeStreamPayload } from './convertChangeStreamPayload';
 import { convertOplogPayload } from './convertOplogPayload';
 import { watchCollections, watchEECollections } from './watchCollections';
+
+type BroadcastCallback = <T extends keyof EventSignatures>(event: T, ...args: Parameters<EventSignatures[T]>) => Promise<void>;
 
 const instancePing = parseInt(String(process.env.MULTIPLE_INSTANCES_PING_INTERVAL)) || 10000;
 
@@ -34,6 +37,8 @@ export class DatabaseWatcher extends EventEmitter {
 
 	private metrics?: any;
 
+	private broadcast?: BroadcastCallback;
+
 	/**
 	 * Last doc timestamp received from a real time event
 	 */
@@ -56,6 +61,19 @@ export class DatabaseWatcher extends EventEmitter {
 	setMetrics(metrics: any): DatabaseWatcher {
 		this.metrics = metrics;
 		return this;
+	}
+
+	setBroadcast(broadcast: BroadcastCallback): DatabaseWatcher {
+		this.broadcast = broadcast;
+		return this;
+	}
+
+	getBroadcast(): BroadcastCallback {
+		if (!this.broadcast) {
+			throw new Error('Broadcast callback not set');
+		}
+
+		return this.broadcast;
 	}
 
 	async watch(): Promise<void> {
