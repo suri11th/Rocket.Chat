@@ -5,6 +5,7 @@ import { api } from '../../../../apps/meteor/server/sdk/api';
 import { broker } from '../../../../apps/meteor/ee/server/startup/broker';
 import { Collections, getCollection, getConnection } from '../../../../apps/meteor/ee/server/services/mongo';
 import { registerServiceModels } from '../../../../apps/meteor/ee/server/lib/registerServiceModels';
+import { Logger } from '../../../../apps/meteor/server/lib/logger/Logger';
 
 const PORT = process.env.PORT || 3035;
 

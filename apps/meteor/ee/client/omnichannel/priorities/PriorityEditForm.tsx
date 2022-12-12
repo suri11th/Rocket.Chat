@@ -1,8 +1,10 @@
-import { ILivechatPriority, Serialized } from '@rocket.chat/core-typings';
+import type { ILivechatPriority, Serialized } from '@rocket.chat/core-typings';
 import { Field, Button, Box, ButtonGroup, Throbber } from '@rocket.chat/fuselage';
 import { useMutableCallback } from '@rocket.chat/fuselage-hooks';
-import { TranslationKey, useToastMessageDispatch, useTranslation } from '@rocket.chat/ui-contexts';
-import React, { ReactElement, useState } from 'react';
+import type { TranslationKey } from '@rocket.chat/ui-contexts';
+import { useToastMessageDispatch, useTranslation } from '@rocket.chat/ui-contexts';
+import type { ReactElement } from 'react';
+import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 import StringSettingInput from '../../../../client/views/admin/settings/inputs/StringSettingInput';
@@ -51,13 +53,20 @@ const PriorityEditForm = ({ data, onSave, onCancel }: PriorityEditFormProps): Re
 		}
 	});
 
+	const resetName = (): void => {
+		setValue('name', t(i18n), {
+			shouldDirty: true,
+			shouldValidate: true,
+		});
+	};
+
 	return (
 		<Box is='form' display='flex' flexDirection='column' justifyContent='space-between' flexGrow={1}>
 			<Field>
 				<Controller
 					name='name'
 					control={control}
-					rules={{ required: t('The_field_is_required', t('Name')) }}
+					rules={{ required: t('The_field_is_required', t('Name')), validate: (v) => v.trim() !== '' }}
 					render={({ field: { value, onChange } }): ReactElement => (
 						<StringSettingInput
 							_id={_id}
@@ -65,7 +74,7 @@ const PriorityEditForm = ({ data, onSave, onCancel }: PriorityEditFormProps): Re
 							placeholder={t('Name')}
 							value={value}
 							hasResetButton={value !== t(i18n)}
-							onResetButtonClick={(): void => setValue('name', t(i18n), { shouldDirty: true })}
+							onResetButtonClick={resetName}
 							onChangeValue={onChange}
 							disabled={isSaving}
 						/>

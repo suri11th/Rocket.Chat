@@ -1,7 +1,8 @@
 import { Table, IconButton } from '@rocket.chat/fuselage';
 import { useMutableCallback } from '@rocket.chat/fuselage-hooks';
-import { useSetModal, useToastMessageDispatch, useRoute, useMethod, useTranslation } from '@rocket.chat/ui-contexts';
-import React, { ReactElement } from 'react';
+import { useRoute, useEndpoint, useSetModal, useToastMessageDispatch, useTranslation } from '@rocket.chat/ui-contexts';
+import type { ReactElement } from 'react';
+import React from 'react';
 
 import GenericModal from '../../../../client/components/GenericModal';
 
@@ -11,18 +12,14 @@ type Props = {
 };
 
 function RemoveSlaButton({ _id, reload }: Props): ReactElement {
-	const removeSLA = useMethod('livechat:removeSLA');
+	const removeSLA = useEndpoint('DELETE', `/v1/livechat/sla/${_id}`);
 	const setModal = useSetModal();
 	const dispatchToastMessage = useToastMessageDispatch();
 	const t = useTranslation();
 	const slaRoute = useRoute('omnichannel-sla-policies');
 
 	const handleRemoveClick = useMutableCallback(async () => {
-		try {
-			await removeSLA(_id);
-		} catch (error) {
-			console.log(error);
-		}
+		await removeSLA();
 		reload();
 	});
 
