@@ -5,7 +5,7 @@ import type { Timestamp, Db, ChangeStreamDeleteDocument, ChangeStreamInsertDocum
 import { escapeRegExp } from '@rocket.chat/string-helpers';
 import { MongoClient } from 'mongodb';
 
-import type { Logger } from '../lib/logger/Logger';
+import { Logger } from '../lib/logger/Logger';
 import type { EventSignatures } from '../sdk/lib/Events';
 import { convertChangeStreamPayload } from './convertChangeStreamPayload';
 import { convertOplogPayload } from './convertOplogPayload';
@@ -101,16 +101,6 @@ export class DatabaseWatcher extends EventEmitter {
 			this.watchChangeStream();
 		} catch (err: unknown) {
 			await this.watchOplog();
-		}
-	}
-
-	private async isChangeStreamAvailable(): Promise<boolean> {
-		if (!this.db) {
-			throw new Error('No DB set');
-		}
-
-		if (ignoreChangeStream) {
-			return false;
 		}
 	}
 
@@ -253,4 +243,4 @@ export class DatabaseWatcher extends EventEmitter {
 	}
 }
 
-export const watcher = new DatabaseWatcher();
+export const watcher = new DatabaseWatcher({ logger: Logger });

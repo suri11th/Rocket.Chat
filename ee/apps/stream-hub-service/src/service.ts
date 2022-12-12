@@ -23,7 +23,7 @@ const PORT = process.env.PORT || 3035;
 	const { watcher } = await import('../../../../apps/meteor/server/database/DatabaseWatcher');
 
 	watcher.setDb(db);
-	api.registerService(new StreamHub(watcher));
+	api.registerService(new StreamHub(watcher, Logger));
 
 	await api.start();
 
