@@ -6,6 +6,7 @@ import { initWatchers } from '../modules/watchers/watchers.module';
 import { api } from '../sdk/api';
 import { metrics } from '../../app/metrics/server/lib/metrics';
 import { SystemLogger } from '../lib/logger/system';
+import { watchCollections } from '../database/watchCollections';
 
 const { mongo } = MongoInternals.defaultRemoteCollectionDriver();
 
@@ -13,7 +14,8 @@ watcher
 	.setDb(db)
 	.setMetrics(metrics)
 	.setOplogHandle((mongo as any)._oplogHandle)
-	.setBroadcast(api.broadcast.bind(api));
+	.setBroadcast(api.broadcast.bind(api))
+	.addWatchedCollection(watchCollections);
 
 initWatchers(watcher);
 

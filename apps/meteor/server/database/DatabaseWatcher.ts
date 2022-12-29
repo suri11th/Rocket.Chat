@@ -9,7 +9,7 @@ import { Logger } from '../lib/logger/Logger';
 import type { EventSignatures } from '../sdk/lib/Events';
 import { convertChangeStreamPayload } from './convertChangeStreamPayload';
 import { convertOplogPayload } from './convertOplogPayload';
-import { watchCollections, watchEECollections } from './watchCollections';
+import { notWatchedCollections } from './watchCollections';
 
 type BroadcastCallback = <T extends keyof EventSignatures>(event: T, ...args: Parameters<EventSignatures[T]>) => Promise<void>;
 
@@ -39,6 +39,8 @@ export class DatabaseWatcher extends EventEmitter {
 	private metrics?: any;
 
 	private logger: Logger;
+
+	private watchCollections = new Set<string>();
 
 	private broadcast?: BroadcastCallback;
 
@@ -80,6 +82,11 @@ export class DatabaseWatcher extends EventEmitter {
 		}
 
 		return this.broadcast;
+	}
+
+	addWatchedCollection(collections: string[]): DatabaseWatcher {
+		collections.forEach((collection) => this.watchCollections.add(collection));
+		return this;
 	}
 
 	async watch(): Promise<void> {
@@ -149,7 +156,7 @@ export class DatabaseWatcher extends EventEmitter {
 		const stream = cursor.stream();
 
 		stream.on('data', (doc) => {
-			const doesMatter = watchCollections.some((collection) => doc.ns === `${dbName}.${collection}`);
+			const doesMatter = [...this.watchCollections].some((collection) => doc.ns === `${dbName}.${collection}`);
 			if (!doesMatter) {
 				return;
 			}
@@ -171,7 +178,7 @@ export class DatabaseWatcher extends EventEmitter {
 
 		this.logger.startup('Using Meteor oplog');
 
-		watchCollections.forEach((collection) => {
+		this.watchCollections.forEach((collection) => {
 			this._oplogHandle.onOplogEntry({ collection }, (event: any) => {
 				this.emitDoc(collection, convertOplogPayload(event));
 			});
@@ -189,11 +196,15 @@ export class DatabaseWatcher extends EventEmitter {
 				{
 					$match: {
 						'operationType': { $in: ['insert', 'update', 'delete'] },
-						'ns.coll': { $in: [...watchCollections, ...watchEECollections] },
+						'ns.coll': { $nin: notWatchedCollections },
 					},
 				},
 			]);
 			changeStream.on('change', (event) => {
+				if (!this.watchCollections.has(event.ns.coll)) {
+					return;
+				}
+
 				this.emitDoc(event.ns.coll, convertChangeStreamPayload(event));
 			});
 
