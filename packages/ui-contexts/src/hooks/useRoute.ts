@@ -15,9 +15,9 @@ export const useRoute = (name: string): Route => {
 
 	return useMemo<Route>(
 		() => ({
-			getPath: (parameters, queryStringParameters): string | undefined => queryRoutePath(name, parameters, queryStringParameters)[1](),
+			getPath: (parameters, queryStringParameters): string | undefined => queryRoutePath(name, parameters, queryStringParameters).get(),
 			getUrl: (parameters, queryStringParameters): ReturnType<Route['getUrl']> =>
-				queryRouteUrl(name, parameters, queryStringParameters)[1](),
+				queryRouteUrl(name, parameters, queryStringParameters).get(),
 			push: (parameters, queryStringParameters): ReturnType<Route['push']> => pushRoute(name, parameters, queryStringParameters),
 			replace: (parameters, queryStringParameters): ReturnType<Route['replace']> => replaceRoute(name, parameters, queryStringParameters),
 		}),

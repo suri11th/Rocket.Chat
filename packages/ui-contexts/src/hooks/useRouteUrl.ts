@@ -11,10 +11,10 @@ export const useRouteUrl = (
 ): string | undefined => {
 	const { queryRouteUrl } = useContext(RouterContext);
 
-	const [subscribe, getSnapshot] = useMemo(
+	const { subscribe, get } = useMemo(
 		() => queryRouteUrl(name, parameters, queryStringParameters),
 		[queryRouteUrl, name, parameters, queryStringParameters],
 	);
 
-	return useSyncExternalStore(subscribe, getSnapshot);
+	return useSyncExternalStore(subscribe, get);
 };

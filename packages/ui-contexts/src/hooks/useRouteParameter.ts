@@ -6,7 +6,7 @@ import { RouterContext } from '../RouterContext';
 export const useRouteParameter = (name: string): string | undefined => {
 	const { queryRouteParameter } = useContext(RouterContext);
 
-	const [subscribe, getSnapshot] = useMemo(() => queryRouteParameter(name), [queryRouteParameter, name]);
+	const { subscribe, get } = useMemo(() => queryRouteParameter(name), [queryRouteParameter, name]);
 
-	return useSyncExternalStore(subscribe, getSnapshot);
+	return useSyncExternalStore(subscribe, get);
 };

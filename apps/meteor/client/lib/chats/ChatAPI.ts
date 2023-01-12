@@ -1,4 +1,4 @@
-import type { IMessage, IRoom } from '@rocket.chat/core-typings';
+import type { IMessage, IRoom, Subscribable } from '@rocket.chat/core-typings';
 
 import type { FormattingButton } from '../../../app/ui-message/client/messageBox/messageBoxFormatting';
 import type { Upload } from './Upload';
@@ -11,11 +11,6 @@ export type UserActionAPI = {
 		}[];
 		subscribe(callback: () => void): () => void;
 	};
-};
-
-type Subscribable<T> = {
-	get(): T;
-	subscribe(callback: () => void): () => void;
 };
 
 export type ComposerAPI = {
