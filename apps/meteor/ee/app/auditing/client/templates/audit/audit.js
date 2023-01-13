@@ -1,11 +1,10 @@
 import { Template } from 'meteor/templating';
 import { ReactiveVar } from 'meteor/reactive-var';
-import { FlowRouter } from 'meteor/kadira:flow-router';
 
 import { hasAllPermission } from '../../../../../../app/authorization/client';
 import { messageContext } from '../../../../../../app/ui-utils/client/lib/messageContext';
 import { call } from '../../utils.js';
-
+import { router } from '../../../../../../client/lib/router';
 import './audit.html';
 
 const loadMessages = async function ({ rid, users, startDate, endDate = new Date(), msg, type, visitor, agent }) {
@@ -64,7 +63,7 @@ Template.audit.onCreated(async function () {
 	this.hasResults = new ReactiveVar(false);
 
 	if (!hasAllPermission('can-audit')) {
-		return FlowRouter.go('/home');
+		return router.go('/home');
 	}
 
 	this.autorun(() => {

@@ -5,7 +5,7 @@ export { ConnectionStatusContext, ConnectionStatusContextValue } from './Connect
 export { CustomSoundContext, CustomSoundContextValue } from './CustomSoundContext';
 export { LayoutContext, LayoutContextValue } from './LayoutContext';
 export { ModalContext, ModalContextValue } from './ModalContext';
-export { RouterContext, RouterContextValue } from './RouterContext';
+export { RouterContext, RouterContextValue, Route, RouteGroup } from './RouterContext';
 export { ServerContext, ServerContextValue } from './ServerContext';
 export { SessionContext, SessionContextValue } from './SessionContext';
 export { SettingsContext, SettingsContextValue, SettingsContextQuery } from './SettingsContext';
@@ -52,6 +52,7 @@ export { useRoomAvatarPath } from './hooks/useRoomAvatarPath';
 export { useRoute } from './hooks/useRoute';
 export { useRouteParameter } from './hooks/useRouteParameter';
 export { useRoutePath } from './hooks/useRoutePath';
+export { useRouter } from './hooks/useRouter';
 export { useServerInformation } from './hooks/useServerInformation';
 export { useSession } from './hooks/useSession';
 export { useSessionDispatch } from './hooks/useSessionDispatch';

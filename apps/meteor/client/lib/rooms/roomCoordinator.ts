@@ -1,5 +1,4 @@
 import type { IRoom, RoomType, IUser, AtLeast, ValueOf } from '@rocket.chat/core-typings';
-import { FlowRouter } from 'meteor/kadira:flow-router';
 import type { RouteOptions } from 'meteor/kadira:flow-router';
 import _ from 'underscore';
 
@@ -15,6 +14,7 @@ import type {
 	RoomIdentification,
 } from '../../../definition/IRoomTypeConfig';
 import { RoomCoordinator } from '../../../lib/rooms/coordinator';
+import { router } from '../router';
 import { roomExit } from './roomExit';
 
 class RoomCoordinatorClient extends RoomCoordinator {
@@ -65,7 +65,8 @@ class RoomCoordinatorClient extends RoomCoordinator {
 	}
 
 	protected addRoute(path: string, routeConfig: RouteOptions): void {
-		super.addRoute(path, { ...routeConfig, triggersExit: [roomExit] });
+		const options = { ...routeConfig, action: routeConfig.action ?? (() => undefined), triggersExit: [roomExit] };
+		router.register(path, options);
 	}
 
 	getRoomDirectives(roomType: string): IRoomTypeClientDirectives | undefined {
@@ -116,7 +117,7 @@ class RoomCoordinatorClient extends RoomCoordinator {
 			return;
 		}
 
-		FlowRouter.go(config.route.name, routeData, queryParams);
+		router.go(config.route.path ?? config.route.name, routeData, queryParams);
 	}
 
 	isLivechatRoom(roomType: string): boolean {

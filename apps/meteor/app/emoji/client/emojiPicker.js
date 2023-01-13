@@ -1,7 +1,6 @@
 import _ from 'underscore';
 import { ReactiveVar } from 'meteor/reactive-var';
 import { ReactiveDict } from 'meteor/reactive-dict';
-import { FlowRouter } from 'meteor/kadira:flow-router';
 import { Template } from 'meteor/templating';
 import { escapeRegExp } from '@rocket.chat/string-helpers';
 
@@ -9,6 +8,7 @@ import { t } from '../../utils/client';
 import { EmojiPicker } from './lib/EmojiPicker';
 import { emoji } from '../lib/rocketchat';
 import './emojiPicker.html';
+import { router } from '../../../client/lib/router';
 
 const ESCAPE = 27;
 
@@ -151,7 +151,7 @@ Template.emojiPicker.events({
 	'click .add-custom'(event) {
 		event.stopPropagation();
 		event.preventDefault();
-		FlowRouter.go('/admin/emoji-custom/new');
+		router.go('/admin/emoji-custom/new');
 		EmojiPicker.close();
 	},
 	'click .category-link'(event) {

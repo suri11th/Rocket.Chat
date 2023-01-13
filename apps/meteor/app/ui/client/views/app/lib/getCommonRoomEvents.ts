@@ -1,6 +1,5 @@
 import Clipboard from 'clipboard';
 import { Meteor } from 'meteor/meteor';
-import { FlowRouter } from 'meteor/kadira:flow-router';
 import { isRoomFederated } from '@rocket.chat/core-typings';
 import { Blaze } from 'meteor/blaze';
 
@@ -18,6 +17,7 @@ import { mountPopover } from './mountPopover';
 import type { CommonRoomTemplateInstance } from './CommonRoomTemplateInstance';
 import { roomCoordinator } from '../../../../../../client/lib/rooms/roomCoordinator';
 import { EmojiPicker } from '../../../../../emoji/client';
+import { router } from '../../../../../../client/lib/router';
 
 const createMessageTouchEvents = () => {
 	let moved = false;
@@ -134,19 +134,22 @@ function handleOpenThreadButtonClick(event: JQuery.ClickEvent) {
 	} = messageArgs(dataContext);
 	const room = Rooms.findOne({ _id: rid });
 
-	FlowRouter.go(
-		FlowRouter.getRouteName(),
+	router.go(
+		router.currentPathDef.get(),
 		{
 			rid,
 			name: room.name,
 			tab: 'thread',
 			context: tmid || _id,
 		},
-		tmid && tmid !== _id && _id
-			? {
-					jump: _id,
-			  }
-			: {},
+		{
+			queryParams:
+				tmid && tmid !== _id && _id
+					? {
+							jump: _id,
+					  }
+					: {},
+		},
 	);
 }
 
@@ -254,7 +257,7 @@ function handleMentionLinkClick(event: JQuery.ClickEvent, template: CommonRoomTe
 	if (channel) {
 		if (isLayoutEmbedded()) {
 			fireGlobalEvent('click-mention-link', {
-				path: FlowRouter.path('channel', { name: channel }),
+				path: router.queryRoutePath('channel', { name: channel }, {}).get(),
 				channel,
 			});
 		}

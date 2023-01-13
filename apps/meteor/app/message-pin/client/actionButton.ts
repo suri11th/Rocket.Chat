@@ -1,7 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { TAPi18n } from 'meteor/rocketchat:tap-i18n';
-import { FlowRouter } from 'meteor/kadira:flow-router';
 
 import { RoomHistoryManager, MessageAction } from '../../ui-utils/client';
 import { messageArgs } from '../../../client/lib/utils/messageArgs';
@@ -10,6 +9,7 @@ import { hasAtLeastOnePermission } from '../../authorization/client';
 import { Rooms } from '../../models/client';
 import { dispatchToastMessage } from '../../../client/lib/toast';
 import { roomCoordinator } from '../../../client/lib/rooms/roomCoordinator';
+import { router } from '../../../client/lib/router';
 
 Meteor.startup(function () {
 	MessageAction.addButton({
@@ -76,8 +76,8 @@ Meteor.startup(function () {
 				(Template.instance() as any).tabBar.close();
 			}
 			if (message.tmid) {
-				return FlowRouter.go(
-					FlowRouter.getRouteName(),
+				return router.go(
+					router.currentPathDef.get(),
 					{
 						tab: 'thread',
 						context: message.tmid,
@@ -86,7 +86,9 @@ Meteor.startup(function () {
 						name: Rooms.findOne({ _id: message.rid }).name,
 					},
 					{
-						jump: message._id,
+						queryParams: {
+							jump: message._id,
+						},
 					},
 				);
 			}

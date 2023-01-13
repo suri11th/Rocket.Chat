@@ -9,6 +9,7 @@ import React, { lazy } from 'react';
 import { KonchatNotification } from '../../app/ui/client';
 import { APIClient } from '../../app/utils/client';
 import { appLayout } from '../lib/appLayout';
+import { router } from '../lib/router';
 import { dispatchToastMessage } from '../lib/toast';
 import BlazeTemplate from '../views/root/BlazeTemplate';
 import MainLayout from '../views/root/MainLayout';
@@ -33,7 +34,7 @@ const OmnichannelQueueList = lazy(() => import('../views/omnichannel/queueList')
 
 FlowRouter.wait();
 
-FlowRouter.route('/', {
+router.register('/', {
 	name: 'index',
 	action() {
 		appLayout.render(
@@ -43,7 +44,7 @@ FlowRouter.route('/', {
 		);
 
 		if (!Meteor.userId()) {
-			return FlowRouter.go('home');
+			return router.go('/home');
 		}
 
 		Tracker.autorun((c) => {
@@ -52,9 +53,9 @@ FlowRouter.route('/', {
 					const user = Meteor.user() as IUser | null;
 					if (user?.defaultRoom) {
 						const room = user.defaultRoom.split('/');
-						FlowRouter.go(room[0], { name: room[1] }, FlowRouter.current().queryParams);
+						router.go(room[0], { name: room[1] }, FlowRouter.current().queryParams);
 					} else {
-						FlowRouter.go('home');
+						router.go('/home');
 					}
 				});
 				c.stop();
@@ -63,11 +64,11 @@ FlowRouter.route('/', {
 	},
 });
 
-FlowRouter.route('/login', {
+router.register('/login', {
 	name: 'login',
 
 	action() {
-		FlowRouter.go('home');
+		router.go('/home');
 	},
 });
 
@@ -88,7 +89,7 @@ FlowRouter.route('/meet/:rid', {
 		}
 
 		if (!Meteor.userId()) {
-			FlowRouter.go('home');
+			router.go('/home');
 			return;
 		}
 
@@ -129,7 +130,7 @@ FlowRouter.route('/home', {
 	},
 });
 
-FlowRouter.route('/directory/:tab?', {
+router.register('/directory/:tab?', {
 	name: 'directory',
 	action: () => {
 		appLayout.render(
@@ -140,7 +141,7 @@ FlowRouter.route('/directory/:tab?', {
 	},
 });
 
-FlowRouter.route('/omnichannel-directory/:page?/:bar?/:id?/:tab?/:context?', {
+router.register('/omnichannel-directory/:page?/:bar?/:id?/:tab?/:context?', {
 	name: 'omnichannel-directory',
 	action: () => {
 		appLayout.render(
@@ -151,7 +152,7 @@ FlowRouter.route('/omnichannel-directory/:page?/:bar?/:id?/:tab?/:context?', {
 	},
 });
 
-FlowRouter.route('/livechat-queue', {
+router.register('/livechat-queue', {
 	name: 'livechat-queue',
 	action: () => {
 		appLayout.render(
@@ -162,49 +163,49 @@ FlowRouter.route('/livechat-queue', {
 	},
 });
 
-FlowRouter.route('/terms-of-service', {
+router.register('/terms-of-service', {
 	name: 'terms-of-service',
 	action: () => {
 		appLayout.render(<CMSPage page='Layout_Terms_of_Service' />);
 	},
 });
 
-FlowRouter.route('/privacy-policy', {
+router.register('/privacy-policy', {
 	name: 'privacy-policy',
 	action: () => {
 		appLayout.render(<CMSPage page='Layout_Privacy_Policy' />);
 	},
 });
 
-FlowRouter.route('/legal-notice', {
+router.register('/legal-notice', {
 	name: 'legal-notice',
 	action: () => {
 		appLayout.render(<CMSPage page='Layout_Legal_Notice' />);
 	},
 });
 
-FlowRouter.route('/register/:hash', {
+router.register('/register/:hash', {
 	name: 'register-secret-url',
 	action: () => {
 		appLayout.render(<SecretURLPage />);
 	},
 });
 
-FlowRouter.route('/invite/:hash', {
+router.register('/invite/:hash', {
 	name: 'invite',
 	action: () => {
 		appLayout.render(<InvitePage />);
 	},
 });
 
-FlowRouter.route('/setup-wizard/:step?', {
+router.register('/setup-wizard/:step?', {
 	name: 'setup-wizard',
 	action: () => {
 		appLayout.render(<SetupWizardRoute />);
 	},
 });
 
-FlowRouter.route('/mailer/unsubscribe/:_id/:createdAt', {
+router.register('/mailer/unsubscribe/:_id/:createdAt', {
 	name: 'mailer-unsubscribe',
 	action: () => {
 		appLayout.render(<MailerUnsubscriptionPage />);
@@ -222,20 +223,20 @@ FlowRouter.route('/login-token/:token', {
 			],
 			userCallback(error) {
 				console.error(error);
-				FlowRouter.go('/');
+				router.go('/');
 			},
 		});
 	},
 });
 
-FlowRouter.route('/reset-password/:token', {
+router.register('/reset-password/:token', {
 	name: 'resetPassword',
 	action() {
 		appLayout.render(<ResetPasswordPage />);
 	},
 });
 
-FlowRouter.route('/snippet/:snippetId/:snippetName', {
+router.register('/snippet/:snippetId/:snippetName', {
 	name: 'snippetView',
 	action() {
 		appLayout.render(
@@ -246,7 +247,7 @@ FlowRouter.route('/snippet/:snippetId/:snippetName', {
 	},
 });
 
-FlowRouter.route('/oauth/authorize', {
+router.register('/oauth/authorize', {
 	name: 'oauth/authorize',
 	action() {
 		appLayout.render(
@@ -257,7 +258,7 @@ FlowRouter.route('/oauth/authorize', {
 	},
 });
 
-FlowRouter.route('/oauth/error/:error', {
+router.register('/oauth/error/:error', {
 	name: 'oauth/error',
 	action() {
 		appLayout.render(

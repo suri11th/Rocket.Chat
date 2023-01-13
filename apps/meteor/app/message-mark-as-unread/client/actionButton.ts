@@ -1,11 +1,11 @@
 import { Meteor } from 'meteor/meteor';
-import { FlowRouter } from 'meteor/kadira:flow-router';
 
 import { RoomManager, MessageAction } from '../../ui-utils/client';
 import { messageArgs } from '../../../client/lib/utils/messageArgs';
 import { ChatSubscription } from '../../models/client';
 import { roomCoordinator } from '../../../client/lib/rooms/roomCoordinator';
 import { dispatchToastMessage } from '../../../client/lib/toast';
+import { router } from '../../../client/lib/router';
 
 Meteor.startup(() => {
 	MessageAction.addButton({
@@ -27,7 +27,7 @@ Meteor.startup(() => {
 					return;
 				}
 				RoomManager.close(subscription.t + subscription.name);
-				return FlowRouter.go('home');
+				return router.go('/home');
 			});
 		},
 		condition({ message, user, room }) {

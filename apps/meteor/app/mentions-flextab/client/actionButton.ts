@@ -5,6 +5,7 @@ import { FlowRouter } from 'meteor/kadira:flow-router';
 import { MessageAction, RoomHistoryManager } from '../../ui-utils/client';
 import { messageArgs } from '../../../client/lib/utils/messageArgs';
 import { Rooms } from '../../models/client';
+import { router } from '../../../client/lib/router';
 
 Meteor.startup(function () {
 	MessageAction.addButton({
@@ -20,8 +21,8 @@ Meteor.startup(function () {
 				(Template.instance() as any).tabBar.close();
 			}
 			if (message.tmid) {
-				return FlowRouter.go(
-					FlowRouter.getRouteName(),
+				return router.go(
+					FlowRouter.current().route?.pathDef || FlowRouter.current().path,
 					{
 						tab: 'thread',
 						context: message.tmid,
@@ -29,7 +30,9 @@ Meteor.startup(function () {
 						name: Rooms.findOne({ _id: message.rid }).name,
 					},
 					{
-						jump: message._id,
+						queryParams: {
+							jump: message._id,
+						},
 					},
 				);
 			}
