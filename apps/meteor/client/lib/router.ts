@@ -159,11 +159,14 @@ class FlowRouterRouter extends FlowRouterRouteGroup implements RouterContextValu
 	) {
 		const go = () =>
 			FlowRouter.go(pathDef, params, typeof queryParams === 'function' ? queryParams(FlowRouter.current().queryParams) : queryParams);
-		if (replace) {
-			FlowRouter.withReplaceState(go);
-		} else {
-			go();
-		}
+
+		setTimeout(() => {
+			if (replace) {
+				FlowRouter.withReplaceState(go);
+			} else {
+				go();
+			}
+		}, 0);
 	}
 
 	currentPathDef = {

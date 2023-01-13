@@ -1,6 +1,7 @@
 import { lazy } from 'react';
 
 import { createRouteGroup } from '../../lib/createRouteGroup';
+import { router } from '../../lib/router';
 
 export const registerAccountRoute = createRouteGroup(
 	'account',
@@ -31,4 +32,10 @@ registerAccountRoute('/integrations', {
 registerAccountRoute('/tokens', {
 	name: 'tokens',
 	component: lazy(() => import('./tokens/AccountTokensRoute')),
+});
+
+registerAccountRoute('/*', {
+	action: () => {
+		router.go('/account/profile', {}, { replace: true });
+	},
 });
