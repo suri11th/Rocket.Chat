@@ -6,91 +6,53 @@ import React from 'react';
 function AppInstallationModal({ currentEnabledApps, enabledAppsLimit }: { currentEnabledApps: number; enabledAppsLimit: number }) {
 	const t = useTranslation();
 
-	const appLimitStatus: string =
-		// eslint-disable-next-line no-nested-ternary
-		currentEnabledApps < enabledAppsLimit ? 'regular' : currentEnabledApps === enabledAppsLimit ? 'reached' : 'exceeded';
-
-	const modalCreator = (appLimitStatus: string) => {
-		switch (appLimitStatus) {
-			case 'regular':
-				return {
-					// TODO: fix translation and button clicks
-					modalTitle: `${currentEnabledApps} of ${enabledAppsLimit} private apps enabled`,
-					modalContent: `${'Workspaces on Community Edition can have up to 3 private apps enabled.\nUpgrade to Enterprise to enable unlimited apps.'}`,
-					buttonContent: (
-						<Button
-							primary
-							onClick={() => {
-								console.log('click');
-							}}
-						>
-							{t('Next')}
-						</Button>
-					),
-				};
-
-			case 'reached':
-				return {
-					// TODO: fix translation
-					modalTitle: `${t('Private app limit reached')}`,
-					modalContent: (
-						<>
-							<Box fontWeight='p2b'>
-								{`${currentEnabledApps} of ${enabledAppsLimit} apps currently enabled.`}
-								<Box mb='x16'>{`\nWorkspaces on Community Edition can have up to ${enabledAppsLimit} private apps enabled.`}</Box>
-							</Box>
-
-							<Box mb='x16'>
-								<Box fontWeight='p2b' mi='x2'>
-									{t('This app will be disabled by default.')}
-								</Box>
-								{t('Disable another app or upgrade to Enterprise to enable this app.')}
-							</Box>
-						</>
-					),
-					buttonContent: (
-						<Button
-							secondary
-							onClick={() => {
-								console.log('click');
-							}}
-						>
-							{t('Upload anyway')}
-						</Button>
-					),
-				};
-
-			default:
-				return {
-					modalTitle: `${t('App limit exceeded')}`,
-					modalContent: (
-						<>
-							<Box fontWeight='p2b'>{`${currentEnabledApps} of ${enabledAppsLimit} apps currently enabled.`}</Box>
-							{t('Community edition app limit has been exceeded.')}
-							<Box mb='x16'>{`Workspaces on Community Edition can have up to ${enabledAppsLimit} private apps enabled.`}</Box>
-							<Box mb='x16'>
-								<Box fontWeight='p2b' mi='x2'>
-									{t('This app will be disabled by default.')}
-								</Box>
-								{`This app will be disabled by default. You will need to disable at least ${
-									currentEnabledApps - enabledAppsLimit
-								} other apps or upgrade to Enterprise to enable the
-								this app.`}
-							</Box>
-						</>
-					),
-					buttonContent: (
-						<Button
-							secondary
-							onClick={() => {
-								console.log('click');
-							}}
-						>
-							{t('Upload anyway')}
-						</Button>
-					),
-				};
+	const modalBuilder = () => {
+		if (currentEnabledApps < enabledAppsLimit) {
+			return {
+				title: t('Private_Apps_Enabled', currentEnabledApps, enabledAppsLimit),
+				content: (
+					<Box display='flex' flexDirection='column'>
+						{t('Workspaces_on_Community_private_apps', enabledAppsLimit)}
+						{t('Upgrade_to_Enterprise')}
+					</Box>
+				),
+				button: <Button primary>{t('Next')}</Button>,
+			};
 		}
+		if (currentEnabledApps === enabledAppsLimit) {
+			return {
+				title: t('Private_app_limit_reached'),
+				content: (
+					<Box display='flex' flexDirection='column'>
+						{t('Private_Apps_Currently_Enabled', currentEnabledApps, enabledAppsLimit)}
+						{t('Workspaces_on_Community_private_apps', enabledAppsLimit)}
+						<Box display='flex' flexDirection='row'>
+							<Box fontWeight='p1b'>{t('This_app_will_be_disabled')}</Box>
+							{t('Disable_another_app')}
+						</Box>
+					</Box>
+				),
+				button: <Button secondary>{t('Upload_anyway')}</Button>,
+			};
+		}
+
+		return {
+			title: t('Private_apps_limit_exceeded'),
+			content: (
+				<Box mb='x16' display='flex' flexDirection='column'>
+					<Box>
+						{t('Private_Apps_Currently_Enabled', currentEnabledApps, enabledAppsLimit)}
+						{t('Community_Private_apps_limit_exceeded')}
+					</Box>
+					{t('Workspaces_on_Community_private_apps', enabledAppsLimit)}
+					<Box display='flex' flexDirection='row'>
+						<Box fontWeight='p1b'>{t('This_app_will_be_disabled')}</Box>
+						{t('Disable_at_least_more_apps', currentEnabledApps - enabledAppsLimit)}
+					</Box>
+				</Box>
+			),
+			button: <Button secondary>{t('Upload_anyway')}</Button>,
+		};
 	};
 
 	return (
@@ -98,12 +60,12 @@ function AppInstallationModal({ currentEnabledApps, enabledAppsLimit }: { curren
 			<Modal>
 				<Modal.Header>
 					<Modal.HeaderText>
-						<Modal.Title>{modalCreator(appLimitStatus).modalTitle}</Modal.Title>
+						<Modal.Title>{modalBuilder().title}</Modal.Title>
 					</Modal.HeaderText>
 					<Modal.Close />
 				</Modal.Header>
 
-				<Modal.Content>{modalCreator(appLimitStatus).modalContent}</Modal.Content>
+				<Modal.Content>{modalBuilder().content}</Modal.Content>
 
 				<Modal.Footer justifyContent='space-between'>
 					<Modal.FooterAnnotation>
@@ -112,8 +74,8 @@ function AppInstallationModal({ currentEnabledApps, enabledAppsLimit }: { curren
 						</Link>
 					</Modal.FooterAnnotation>
 					<Modal.FooterControllers>
-						<Button>{t('Enable unlimited apps')}</Button>
-						{modalCreator(appLimitStatus).buttonContent}
+						<Button>{t('Enable_unlimited_apps')}</Button>
+						{modalBuilder().button}
 					</Modal.FooterControllers>
 				</Modal.Footer>
 			</Modal>
