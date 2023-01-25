@@ -50,7 +50,7 @@ function AppInstallationModal({ currentEnabledApps, enabledAppsLimit }: { curren
 					</Box>
 					{t('Workspaces_on_Community_private_apps', { enabledAppsLimit })}
 
-					<Box mb='x16' display='inline-block'>
+					<Box mb='x16'>
 						<Box fontWeight='p1b'>{t('This_app_will_be_disabled')}</Box>{' '}
 						<Box>{t('Disable_at_least_more_apps', { numberOfExceededApps })}</Box>
 					</Box>
