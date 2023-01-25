@@ -5556,11 +5556,11 @@
 	"Upgrade_to_Enterprise": "Upgrade to Enterprise to enable unlimited apps.",
 	"Enable_unlimited_apps": "Enable unlimited apps",
 	"Private_app_limit_reached": "Private app limit reached",
-	"Private_Apps_Currently_Enabled": "__currentEnabledApps__ of __enabledAppsLimit__ apps currently enabled",
+	"Private_Apps_Currently_Enabled": "__currentEnabledApps__ of __enabledAppsLimit__ apps currently enabled.",
 	"This_app_will_be_disabled": "This app will be disabled by default.",
 	"Disable_another_app": "Disable another app or upgrade to Enterprise to enable this app.",
 	"Upload_anyway": "Upload anyway",
-	"Private_apps_limit_exceeded": "App limit exceeded.",
+	"Private_apps_limit_exceeded": "App limit exceeded",
 	"Community_Private_apps_limit_exceeded": "Community edition app limit has been exceeded.",
 	"Disable_at_least_more_apps": "You will need to disable at least __numberOfExceededApps__ other apps or upgrade to Enterprise to enable this app."
 }

@@ -13,7 +13,7 @@ function AppInstallationModal({ currentEnabledApps, enabledAppsLimit }: { curren
 				content: (
 					<Box display='flex' flexDirection='column'>
 						{t('Workspaces_on_Community_private_apps', { enabledAppsLimit })}
-						{t('Upgrade_to_Enterprise')}
+						<Box>{t('Upgrade_to_Enterprise')}</Box>
 					</Box>
 				),
 				button: <Button primary>{t('Next')}</Button>,
@@ -45,11 +45,12 @@ function AppInstallationModal({ currentEnabledApps, enabledAppsLimit }: { curren
 			content: (
 				<Box display='flex' flexDirection='column'>
 					<Box mbe='x16'>
-						{t('Private_Apps_Currently_Enabled', { currentEnabledApps, enabledAppsLimit })}
+						<Box fontWeight='p1b'>{t('Private_Apps_Currently_Enabled', { currentEnabledApps, enabledAppsLimit })}</Box>
 						{t('Community_Private_apps_limit_exceeded')}
 					</Box>
 					{t('Workspaces_on_Community_private_apps', { enabledAppsLimit })}
-					<Box mb='x16'>
+
+					<Box mb='x16' display='inline-block'>
 						<Box fontWeight='p1b'>{t('This_app_will_be_disabled')}</Box> {t('Disable_at_least_more_apps', { numberOfExceededApps })}
 					</Box>
 				</Box>
