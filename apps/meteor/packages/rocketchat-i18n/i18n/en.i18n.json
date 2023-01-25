@@ -5561,6 +5561,6 @@
 	"Disable_another_app": "Disable another app or upgrade to Enterprise to enable this app.",
 	"Upload_anyway": "Upload anyway",
 	"Private_apps_limit_exceeded": "App limit exceeded",
-	"Community_Private_apps_limit_exceeded": "Community edition app limit has been exceeded.",
-	"Disable_at_least_more_apps": "You will need to disable at least __numberOfExceededApps__ other apps or upgrade to Enterprise to enable this app."
+	"Disable_at_least_more_apps": "You will need to disable at least __numberOfExceededApps__ other apps or upgrade to Enterprise to enable this app.",
+	"Community_Private_apps_limit_exceeded": "Community edition app limit has been exceeded."
 }
