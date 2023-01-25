@@ -1,9 +1,13 @@
 import { Box, Button, Modal } from '@rocket.chat/fuselage';
 import { Link } from '@rocket.chat/layout';
 import { useTranslation } from '@rocket.chat/ui-contexts';
-import React from 'react';
+import React, { useContext } from 'react';
 
-function AppInstallationModal({ currentEnabledApps, enabledAppsLimit }: { currentEnabledApps: number; enabledAppsLimit: number }) {
+const AppInstallationModal = () => {
+	// TODO: provide Contexts
+	const currentEnabledApps: number = useContext(currentEnabledAppsContext);
+	const enabledAppsLimit: number = useContext(enabledAppsLimitContext);
+
 	const t = useTranslation();
 
 	const modalBuilder = () => {
@@ -86,6 +90,6 @@ function AppInstallationModal({ currentEnabledApps, enabledAppsLimit }: { curren
 			</Modal>
 		</>
 	);
-}
+};
 
 export default AppInstallationModal;
