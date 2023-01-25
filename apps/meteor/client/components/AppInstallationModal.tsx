@@ -9,10 +9,10 @@ function AppInstallationModal({ currentEnabledApps, enabledAppsLimit }: { curren
 	const modalBuilder = () => {
 		if (currentEnabledApps < enabledAppsLimit) {
 			return {
-				title: t('Private_Apps_Enabled', currentEnabledApps, enabledAppsLimit),
+				title: t('Private_Apps_Enabled', { currentEnabledApps, enabledAppsLimit }),
 				content: (
 					<Box display='flex' flexDirection='column'>
-						{t('Workspaces_on_Community_private_apps', enabledAppsLimit)}
+						{t('Workspaces_on_Community_private_apps', { enabledAppsLimit })}
 						{t('Upgrade_to_Enterprise')}
 					</Box>
 				),
@@ -24,11 +24,13 @@ function AppInstallationModal({ currentEnabledApps, enabledAppsLimit }: { curren
 				title: t('Private_app_limit_reached'),
 				content: (
 					<Box display='flex' flexDirection='column'>
-						{t('Private_Apps_Currently_Enabled', currentEnabledApps, enabledAppsLimit)}
-						{t('Workspaces_on_Community_private_apps', enabledAppsLimit)}
-						<Box display='flex' flexDirection='row'>
-							<Box fontWeight='p1b'>{t('This_app_will_be_disabled')}</Box>
-							{t('Disable_another_app')}
+						<Box fontWeight='p1b' mbe='x16'>
+							{t('Private_Apps_Currently_Enabled', { currentEnabledApps, enabledAppsLimit })}
+						</Box>
+
+						{t('Workspaces_on_Community_private_apps', { enabledAppsLimit })}
+						<Box mb='x16'>
+							<Box fontWeight='p1b'>{t('This_app_will_be_disabled')}</Box> {t('Disable_another_app')}
 						</Box>
 					</Box>
 				),
@@ -36,18 +38,19 @@ function AppInstallationModal({ currentEnabledApps, enabledAppsLimit }: { curren
 			};
 		}
 
+		const numberOfExceededApps = currentEnabledApps - enabledAppsLimit;
+
 		return {
 			title: t('Private_apps_limit_exceeded'),
 			content: (
-				<Box mb='x16' display='flex' flexDirection='column'>
-					<Box>
-						{t('Private_Apps_Currently_Enabled', currentEnabledApps, enabledAppsLimit)}
+				<Box display='flex' flexDirection='column'>
+					<Box mbe='x16'>
+						{t('Private_Apps_Currently_Enabled', { currentEnabledApps, enabledAppsLimit })}
 						{t('Community_Private_apps_limit_exceeded')}
 					</Box>
-					{t('Workspaces_on_Community_private_apps', enabledAppsLimit)}
-					<Box display='flex' flexDirection='row'>
-						<Box fontWeight='p1b'>{t('This_app_will_be_disabled')}</Box>
-						{t('Disable_at_least_more_apps', currentEnabledApps - enabledAppsLimit)}
+					{t('Workspaces_on_Community_private_apps', { enabledAppsLimit })}
+					<Box mb='x16'>
+						<Box fontWeight='p1b'>{t('This_app_will_be_disabled')}</Box> {t('Disable_at_least_more_apps', { numberOfExceededApps })}
 					</Box>
 				</Box>
 			),
