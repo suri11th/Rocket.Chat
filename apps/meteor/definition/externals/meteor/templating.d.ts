@@ -117,8 +117,8 @@ declare module 'meteor/templating' {
 				users: IUser['username'][];
 				msg: IMessage['msg'];
 				type: string;
-				visitor: ILivechatVisitor;
-				agent: ILivechatAgent | 'all';
+				visitor: ILivechatVisitor['_id'];
+				agent: ILivechatAgent['_id'];
 			},
 			Blaze.TemplateInstance<{
 				rid: IRoom['_id'];
@@ -127,8 +127,8 @@ declare module 'meteor/templating' {
 				users: IUser['username'][];
 				msg: IMessage['msg'];
 				type: string;
-				visitor: ILivechatVisitor;
-				agent: ILivechatAgent | 'all';
+				visitor: ILivechatVisitor['_id'];
+				agent: ILivechatAgent['_id'];
 			}> & {
 				messagesContext: ReactiveVar<{
 					u?: Partial<IUser>;
@@ -166,8 +166,8 @@ declare module 'meteor/templating' {
 					users: IUser['username'][];
 					msg: IMessage['msg'];
 					type: string;
-					visitor: ILivechatVisitor;
-					agent: ILivechatAgent | 'all';
+					visitor: ILivechatVisitor['_id'];
+					agent: ILivechatAgent['_id'];
 				}) => Promise<void>;
 				messages?: ReactiveVar<IMessage[]>;
 			}
