@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { HTTP } from 'meteor/http';
-import { Settings } from '@rocket.chat/models';
+import { Settings, Users as UsersRaw } from '@rocket.chat/models';
+import { TAPi18n } from 'meteor/rocketchat:tap-i18n';
 
 import { API } from '../../../api/server';
 import { getUploadFormData } from '../../../api/server/lib/getUploadFormData';
@@ -12,6 +13,9 @@ import { Apps } from '../orchestrator';
 import { formatAppInstanceForRest } from '../../lib/misc/formatAppInstanceForRest';
 import { actionButtonsHandler } from './endpoints/actionButtonsHandler';
 import { fetch } from '../../../../server/lib/http/fetch';
+import { apiDeprecationLogger } from '../../../lib/server/lib/deprecationWarningLogger';
+import { notifyAppInstall } from '../marketplace/appInstall';
+import { sendMessagesToAdmins } from '../../../../server/lib/sendMessagesToAdmins';
 
 const rocketChatVersion = Info.version;
 const appsEngineVersionForMarketplace = Info.marketplaceApiVersion.replace(/-.*/g, '');
@@ -82,6 +86,120 @@ export class AppsRestApi {
 			},
 		);
 
+		this.api.addRoute(
+			'marketplace',
+			{ authRequired: true },
+			{
+				async get() {
+					const baseUrl = orchestrator.getMarketplaceUrl();
+
+					// Gets the Apps from the marketplace
+					const headers = getDefaultHeaders();
+					const token = await getWorkspaceAccessToken();
+					if (token) {
+						headers.Authorization = `Bearer ${token}`;
+					}
+
+					const customQueryParams = new URLSearchParams();
+
+					if (this.queryParams.isAdminUser === 'false') {
+						customQueryParams.set('endUserID', this.user._id);
+					}
+
+					let result;
+					try {
+						result = HTTP.get(`${baseUrl}/v1/apps?${customQueryParams.toString()}`, {
+							headers,
+						});
+					} catch (e) {
+						return handleError('Unable to access Marketplace. Does the server has access to the internet?', e);
+					}
+
+					if (!result || result.statusCode !== 200) {
+						orchestrator.getRocketChatLogger().error('Error getting the Apps:', result.data);
+						return API.v1.failure();
+					}
+
+					return API.v1.success(result.data);
+				},
+			},
+		);
+
+		this.api.addRoute(
+			'categories',
+			{ authRequired: true },
+			{
+				async get() {
+					const baseUrl = orchestrator.getMarketplaceUrl();
+
+					const headers = getDefaultHeaders();
+					const token = await getWorkspaceAccessToken();
+					if (token) {
+						headers.Authorization = `Bearer ${token}`;
+					}
+
+					let result;
+					try {
+						result = HTTP.get(`${baseUrl}/v1/categories`, {
+							headers,
+						});
+					} catch (e) {
+						orchestrator.getRocketChatLogger().error('Error getting the categories from the Marketplace:', e.response.data);
+						return API.v1.internalError();
+					}
+
+					if (!result || result.statusCode !== 200) {
+						orchestrator.getRocketChatLogger().error('Error getting the categories from the Marketplace:', result.data);
+						return API.v1.failure();
+					}
+
+					return API.v1.success(result.data);
+				},
+			},
+		);
+
+		this.api.addRoute(
+			'buildExternalUrl',
+			{ authRequired: true },
+			{
+				async get() {
+					const baseUrl = orchestrator.getMarketplaceUrl();
+
+					const workspaceId = settings.get('Cloud_Workspace_Id');
+
+					if (!this.queryParams.purchaseType || !purchaseTypes.has(this.queryParams.purchaseType)) {
+						return API.v1.failure({ error: 'Invalid purchase type' });
+					}
+
+					const token = await getUserCloudAccessToken(this.getLoggedInUser()._id, true, 'marketplace:purchase', false);
+					if (!token) {
+						return API.v1.failure({ error: 'Unauthorized' });
+					}
+
+					const subscribeRoute = this.queryParams.details === 'true' ? 'subscribe/details' : 'subscribe';
+
+					const seats = Users.getActiveLocalUserCount();
+
+					return API.v1.success({
+						url: `${baseUrl}/apps/${this.queryParams.appId}/${
+							this.queryParams.purchaseType === 'buy' ? this.queryParams.purchaseType : subscribeRoute
+						}?workspaceId=${workspaceId}&token=${token}&seats=${seats}`,
+					});
+				},
+			},
+		);
+
+		this.api.addRoute(
+			'installed',
+			{ authRequired: true },
+			{
+				async get() {
+					const apps = manager.get().map(formatAppInstanceForRest);
+					return API.v1.success({ apps });
+				},
+			},
+		);
+
 		// WE NEED TO MOVE EACH ENDPOINT HANDLER TO IT'S OWN FILE
 		this.api.addRoute(
 			'',
@@ -92,6 +210,10 @@ export class AppsRestApi {
 
 					// Gets the Apps from the marketplace
 					if (this.queryParams.marketplace) {
+						apiDeprecationLogger.warn(
+							'This endpoint has been deprecated and will be removed in the future. Use /apps/marketplace to get the apps list.',
+						);
+
 						const headers = getDefaultHeaders();
 						const token = await getWorkspaceAccessToken();
 						if (token) {
@@ -116,6 +238,9 @@ export class AppsRestApi {
 					}
 
 					if (this.queryParams.categories) {
+						apiDeprecationLogger.warn(
+							'This endpoint has been deprecated and will be removed in the future. Use /apps/categories to get the categories list.',
+						);
 						const headers = getDefaultHeaders();
 						const token = await getWorkspaceAccessToken();
 						if (token) {
@@ -141,6 +266,9 @@ export class AppsRestApi {
 					}
 
 					if (this.queryParams.buildExternalUrl && this.queryParams.appId) {
+						apiDeprecationLogger.warn(
+							'This endpoint has been deprecated and will be removed in the future. Use /apps/buildExternalUrl to get the modal URLs.',
+						);
 						const workspaceId = settings.get('Cloud_Workspace_Id');
 
 						if (!this.queryParams.purchaseType || !purchaseTypes.has(this.queryParams.purchaseType)) {
@@ -163,6 +291,9 @@ export class AppsRestApi {
 						});
 					}
 
+					apiDeprecationLogger.warn(
+						'This endpoint has been deprecated and will be removed in the future. Use /apps/installed to get the installed apps list.',
+					);
 					const apps = manager.get().map(formatAppInstanceForRest);
 
 					return API.v1.success({ apps });
@@ -273,10 +404,69 @@ export class AppsRestApi {
 
 					info.status = aff.getApp().getStatus();
 
+					notifyAppInstall(orchestrator.getMarketplaceUrl(), 'install', info);
+
 					return API.v1.success({
 						app: info,
 						implemented: aff.getImplementedInferfaces(),
 						licenseValidation: aff.getLicenseValidationResult(),
+					});
+				},
+			},
+		);
+
+		this.api.addRoute(
+			'buildExternalAppRequest',
+			{ authRequired: true },
+			{
+				async get() {
+					if (!this.queryParams.appId) {
+						return API.v1.failure({ error: 'Invalid request. Please ensure an appId is attached to the request.' });
+					}
+
+					const baseUrl = orchestrator.getMarketplaceUrl();
+					const workspaceId = settings.get('Cloud_Workspace_Id');
+
+					const requester = {
+						id: this.user._id,
+						username: this.user.username,
+						name: this.user.name,
+						nickname: this.user.nickname,
+						emails: this.user.emails.map((e) => e.address),
+					};
+
+					let admins = [];
+					try {
+						const adminsRaw = await UsersRaw.findUsersInRoles('admin', undefined, {
+							projection: {
+								username: 1,
+								name: 1,
+								emails: 1,
+								nickname: 1,
+							},
+						}).toArray();
+
+						admins = adminsRaw.map((a) => {
+							return {
+								id: a._id,
+								username: a.username,
+								name: a.name,
+								nickname: a.nickname,
+								emails: a.emails.map((e) => e.address),
+							};
+						});
+					} catch (e) {
+						orchestrator.getRocketChatLogger().error('Error getting the admins to request an app be installed:', e);
+					}
+
+					const queryParams = new URLSearchParams();
+					queryParams.set('workspaceId', workspaceId);
+					queryParams.set('frameworkVersion', appsEngineVersionForMarketplace);
+					queryParams.set('requester', Buffer.from(JSON.stringify(requester)).toString('base64'));
+					queryParams.set('admins', Buffer.from(JSON.stringify(admins)).toString('base64'));
+
+					return API.v1.success({
+						url: `${baseUrl}/apps/${this.queryParams.appId}/requestAccess?${queryParams.toString()}`,
 					});
 				},
 			},
@@ -558,6 +748,8 @@ export class AppsRestApi {
 
 					info.status = aff.getApp().getStatus();
 
+					notifyAppInstall(orchestrator.getMarketplaceUrl(), 'update', info);
+
 					return API.v1.success({
 						app: info,
 						implemented: aff.getImplementedInferfaces(),
@@ -578,6 +770,8 @@ export class AppsRestApi {
 					const info = prl.getInfo();
 					info.status = prl.getStatus();
 
+					notifyAppInstall(orchestrator.getMarketplaceUrl(), 'uninstall', info);
+
 					return API.v1.success({ app: info });
 				},
 			},
@@ -585,7 +779,7 @@ export class AppsRestApi {
 
 		this.api.addRoute(
 			':id/versions',
-			{ authRequired: true, permissionsRequired: ['manage-apps'] },
+			{ authRequired: true },
 			{
 				async get() {
 					const baseUrl = orchestrator.getMarketplaceUrl();
@@ -611,6 +805,42 @@ export class AppsRestApi {
 					}
 
 					return API.v1.success({ apps: result.data });
+				},
+			},
+		);
+
+		this.api.addRoute(
+			'notify-admins',
+			{ authRequired: true },
+			{
+				async post() {
+					const { appId, appName, message } = this.bodyParams;
+					const workspaceUrl = settings.get('Site_Url');
+
+					const regex = new RegExp('\\/$', 'gm');
+					const safeWorkspaceUrl = workspaceUrl.replace(regex, '');
+					const learnMore = `${safeWorkspaceUrl}/marketplace/explore/info/${appId}`;
+
+					try {
+						const msgs = ({ adminUser }) => {
+							return {
+								msg: TAPi18n.__('App_Request_Admin_Message', {
+									admin_name: adminUser.name,
+									app_name: appName,
+									user_name: this.user.name || this.user.username,
+									message,
+									learn_more: learnMore,
+								}),
+							};
+						};
+
+						await sendMessagesToAdmins({ msgs });
+
+						return API.v1.success();
+					} catch (e) {
+						orchestrator.getRocketChatLogger().error('Error when notifying admins that an user requested an app:', e);
+						return API.v1.failure();
+					}
 				},
 			},
 		);
@@ -901,13 +1131,67 @@ export class AppsRestApi {
 					}
 
 					try {
-						const data = HTTP.get(`${baseUrl}/v1/app-request?appId=${appId}&q=${q}&sort=${sort}&limit=${limit}&offset=${offset}`, {
+						const result = HTTP.get(`${baseUrl}/v1/app-request?appId=${appId}&q=${q}&sort=${sort}&limit=${limit}&offset=${offset}`, {
 							headers,
 						});
 
-						return API.v1.success({ data });
+						return API.v1.success(result.data);
 					} catch (e) {
 						orchestrator.getRocketChatLogger().error('Error getting all non sent app requests from the Marketplace:', e.message);
+
+						return API.v1.failure(e.message);
+					}
+				},
+			},
+		);
+
+		this.api.addRoute(
+			'app-request/stats',
+			{ authRequired: true },
+			{
+				async get() {
+					const baseUrl = orchestrator.getMarketplaceUrl();
+					const headers = getDefaultHeaders();
+
+					const token = await getWorkspaceAccessToken();
+					if (token) {
+						headers.Authorization = `Bearer ${token}`;
+					}
+
+					try {
+						const result = HTTP.get(`${baseUrl}/v1/app-request/stats`, { headers });
+
+						return API.v1.success(result.data);
+					} catch (e) {
+						orchestrator.getRocketChatLogger().error('Error getting the app requests stats from marketplace', e.message);
+
+						return API.v1.failure(e.message);
+					}
+				},
+			},
+		);
+
+		this.api.addRoute(
+			'app-request/markAsSeen',
+			{ authRequired: true },
+			{
+				async post() {
+					const baseUrl = orchestrator.getMarketplaceUrl();
+					const headers = getDefaultHeaders();
+
+					const token = await getWorkspaceAccessToken();
+					if (token) {
+						headers.Authorization = `Bearer ${token}`;
+					}
+
+					const { unseenRequests } = this.bodyParams;
+
+					try {
+						const result = HTTP.post(`${baseUrl}/v1/app-request/markAsSeen`, { headers, data: { ids: unseenRequests } });
+
+						return API.v1.success(result.data);
+					} catch (e) {
+						orchestrator.getRocketChatLogger().error('Error marking app requests as seen', e.message);
 
 						return API.v1.failure(e.message);
 					}
